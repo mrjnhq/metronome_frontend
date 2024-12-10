@@ -4,6 +4,7 @@ import './App.css'
 import LoginSignup from './LoginSignup/LoginSignup'
 import Dashboard from './Dashboard/Dashboard'
 import Routine from './Routine/Routine'
+import TeacherRoutineSearch from './TeacherRoutineSearch/TeacherRoutineSearch'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/" element={<LoginSignup />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/routine" element={<Routine />} />
+      <Route path="/teacher-routine-search" element={<TeacherRoutineSearch></TeacherRoutineSearch>} />
     </Routes>
   )
 }

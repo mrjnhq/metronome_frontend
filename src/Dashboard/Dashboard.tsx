@@ -80,6 +80,7 @@ export default function Dashboard() {
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold">Quick Actions</h2>
                     <div className="flex gap-2">
+                        <Button><Link to="/teacher-routine-search" className="text-white">Search by Initial</Link></Button>
                         <Button>Add/Remove Classes</Button>
                         <Button>Add/Remove Rooms</Button>
                         <Button>Add/Remove Courses</Button>
