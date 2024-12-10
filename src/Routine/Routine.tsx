@@ -20,6 +20,23 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
 
 // First, update the interface
 interface RoutineItem {
@@ -33,6 +50,17 @@ interface RoutineItem {
     endTime: string
     employeeId: string
     dept: string
+}
+
+// Add this interface for the form
+interface AddClassForm {
+    courseCode: string
+    roomId: string
+    teacherInitial: string
+    employeeId: string
+    section: string
+    startTime: string
+    endTime: string
 }
 
 // Add this constant for day mapping
@@ -60,6 +88,8 @@ export default function Routine() {
     const [expandedSections, setExpandedSections] = useState<string[]>([])
     const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedBatch, setSelectedBatch] = useState("64");
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const form = useForm<AddClassForm>()
 
     useEffect(() => {
         const fetchRoutines = async () => {
@@ -113,6 +143,13 @@ export default function Routine() {
     // In the component, modify how we display the time
     const getFormattedTime = (startTime: string, endTime: string) => {
         return `${startTime} - ${endTime}`
+    }
+
+    // Add this function to handle form submission
+    const onSubmit = async (data: AddClassForm) => {
+        // Handle form submission here
+        console.log(data)
+        setDialogOpen(false)
     }
 
     return (
@@ -225,6 +262,110 @@ export default function Routine() {
                             ))}
                         </div>
                         <div className="flex gap-2">
+                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">Add Class</Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Add New Class</DialogTitle>
+                                    </DialogHeader>
+                                    <Form {...form}>
+                                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="courseCode"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Course Code</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="CSE101" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="roomId"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Room ID</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="101" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="teacherInitial"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Teacher Initial</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="ABC" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="employeeId"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Employee ID</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="EMP123" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="section"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Section</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="64_A" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="startTime"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Start Time</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} type="time" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="endTime"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>End Time</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} type="time" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <DialogFooter>
+                                                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit">Add Class</Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
                             <Button variant="outline">Verify</Button>
                             <Button className="bg-red-500 hover:bg-red-600">Update</Button>
                         </div>
