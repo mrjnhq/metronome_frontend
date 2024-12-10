@@ -21,15 +21,35 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
+// First, update the interface
 interface RoutineItem {
-    id: number
-    day: string
-    time: string
-    room: string
+    key: number
+    roomId: string
+    teacherInitial: string
     section: string
     courseCode: string
-    courseName: string
-    teacherInitial: string
+    dayId: string
+    startTime: string
+    endTime: string
+    employeeId: string
+    dept: string
+}
+
+// Add this constant for day mapping
+const DAYS = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+];
+
+// Add utility function to convert dayId to day name
+const getDayName = (dayId: string) => {
+    const id = parseInt(dayId);
+    return DAYS[id];
 }
 
 export default function Routine() {
@@ -37,6 +57,9 @@ export default function Routine() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
+    const [expandedSections, setExpandedSections] = useState<string[]>(['Section J'])
+    const [selectedSection, setSelectedSection] = useState<string | null>(null)
+    const [selectedBatch, setSelectedBatch] = useState("64");
 
     useEffect(() => {
         const fetchRoutines = async () => {
@@ -67,17 +90,30 @@ export default function Routine() {
         "15:45 - 16:00",
     ]
 
-    const sections = [
-        {
-            name: "Section J",
-            expanded: true,
-            days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-        },
-    ]
+    const sections = Array.from({ length: 10 }, (_, i) => ({
+        name: `Section ${String.fromCharCode(65 + i)}`,
+        expanded: true,
+        days: DAYS
+    }));
 
-    const filteredScheduleData = scheduleData.filter(item =>
-        !selectedDay || item.day === selectedDay
-    )
+    // Update the filter logic to handle both section and day filtering
+    const filteredScheduleData = scheduleData.filter(item => {
+        // Get the section letter from section name (e.g., "Section J" -> "J")
+        const sectionLetter = selectedSection?.split(' ')[1];
+
+        // Check if section matches pattern "64_J" where J is the selected section
+        const sectionMatch = !selectedSection || item.section.endsWith(`${selectedBatch}_${sectionLetter}`);
+
+        // Check if day matches
+        const dayMatch = !selectedDay || getDayName(item.dayId) === selectedDay;
+
+        return sectionMatch && dayMatch;
+    });
+
+    // In the component, modify how we display the time
+    const getFormattedTime = (startTime: string, endTime: string) => {
+        return `${startTime} - ${endTime}`
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -115,7 +151,10 @@ export default function Routine() {
             <div className="flex">
                 {/* Sidebar */}
                 <div className="w-64 border-r p-4">
-                    <Select defaultValue="64">
+                    <Select
+                        value={selectedBatch}
+                        onValueChange={setSelectedBatch}
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="Select batch" />
                         </SelectTrigger>
@@ -131,12 +170,27 @@ export default function Routine() {
                             <div key={section.name}>
                                 <Button
                                     variant="ghost"
-                                    className="w-full justify-between font-normal"
+                                    className={`w-full justify-between font-normal ${selectedSection === section.name ? 'bg-blue-100 text-blue-600' : ''
+                                        }`}
+                                    onClick={() => {
+                                        // Toggle section expansion
+                                        setExpandedSections(current =>
+                                            current.includes(section.name)
+                                                ? current.filter(name => name !== section.name)
+                                                : [...current, section.name]
+                                        );
+                                        // Toggle section selection
+                                        setSelectedSection(current =>
+                                            current === section.name ? null : section.name
+                                        );
+                                    }}
                                 >
                                     {section.name}
-                                    {section.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                    {expandedSections.includes(section.name)
+                                        ? <ChevronDown className="h-4 w-4" />
+                                        : <ChevronRight className="h-4 w-4" />}
                                 </Button>
-                                {section.expanded && section.days && (
+                                {expandedSections.includes(section.name) && section.days && (
                                     <div className="ml-4 space-y-1">
                                         {section.days.map((day) => (
                                             <Button
@@ -204,15 +258,16 @@ export default function Routine() {
                                 </TableRow>
                             ) : (
                                 filteredScheduleData.map((row) => (
-                                    <TableRow key={row.id}>
+                                    // Update the table row mapping
+                                    <TableRow key={row.key}>
                                         <TableCell>
                                             <Checkbox />
                                         </TableCell>
-                                        <TableCell>{row.time}</TableCell>
-                                        <TableCell>{row.room}</TableCell>
+                                        <TableCell>{getFormattedTime(row.startTime, row.endTime)}</TableCell>
+                                        <TableCell>{row.roomId}</TableCell>
                                         <TableCell>{row.section}</TableCell>
                                         <TableCell>
-                                            {row.courseCode} - {row.courseName}
+                                            {row.courseCode}
                                         </TableCell>
                                         <TableCell>{row.teacherInitial}</TableCell>
                                         <TableCell>
