@@ -19,7 +19,7 @@ import {
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -34,9 +34,12 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 // First, update the interface
 interface RoutineItem {
@@ -52,7 +55,7 @@ interface RoutineItem {
     dept: string
 }
 
-// Add this interface for the form
+// Update AddClassForm interface
 interface AddClassForm {
     courseCode: string
     roomId: string
@@ -61,6 +64,8 @@ interface AddClassForm {
     section: string
     startTime: string
     endTime: string
+    dayId: string   // Added
+    dept: string    // Added
 }
 
 // Add this constant for day mapping
@@ -80,6 +85,19 @@ const getDayName = (dayId: string) => {
     return DAYS[id];
 }
 
+// Define validation schema
+const formSchema = z.object({
+    courseCode: z.string().min(1, "Course code is required"),
+    roomId: z.string().min(1, "Room ID is required"),
+    teacherInitial: z.string().min(1, "Teacher initial is required"),
+    employeeId: z.string().min(1, "Employee ID is required"),
+    section: z.string().min(1, "Section is required"),
+    startTime: z.string().min(1, "Start time is required"),
+    endTime: z.string().min(1, "End time is required"),
+    dayId: z.string().min(1, "Day is required"),
+    dept: z.string().min(1, "Department is required")
+})
+
 export default function Routine() {
     const [scheduleData, setScheduleData] = useState<RoutineItem[]>([])
     const [loading, setLoading] = useState(true)
@@ -89,7 +107,21 @@ export default function Routine() {
     const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedBatch, setSelectedBatch] = useState("64");
     const [dialogOpen, setDialogOpen] = useState(false)
-    const form = useForm<AddClassForm>()
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            courseCode: "",
+            roomId: "",
+            teacherInitial: "",
+            employeeId: "",
+            section: "",
+            startTime: "",
+            endTime: "",
+            dayId: "",
+            dept: "CSE"
+        }
+    })
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchRoutines = async () => {
@@ -120,37 +152,74 @@ export default function Routine() {
         "15:45 - 16:00",
     ]
 
-    const sections = Array.from({ length: 20 }, (_, i) => ({
-        name: `Section ${String.fromCharCode(65 + i)}`,
-        expanded: false,
-        days: DAYS
-    }));
+    const sections = useMemo(() =>
+        Array.from({ length: 20 }, (_, i) => ({
+            name: `Section ${String.fromCharCode(65 + i)}`,
+            expanded: false,
+            days: DAYS
+        })),
+        []);
 
     // Update the filter logic to handle both section and day filtering
-    const filteredScheduleData = scheduleData.filter(item => {
-        // Get the section letter from section name (e.g., "Section J" -> "J")
-        const sectionLetter = selectedSection?.split(' ')[1];
+    const filteredScheduleData = useMemo(() =>
+        scheduleData.filter(item => {
+            // Get the section letter from section name (e.g., "Section J" -> "J")
+            const sectionLetter = selectedSection?.split(' ')[1];
 
-        // Check if section matches pattern "64_J" where J is the selected section
-        const sectionMatch = !selectedSection || item.section.endsWith(`${selectedBatch}_${sectionLetter}`);
+            // Check if section matches pattern "64_J" where J is the selected section
+            const sectionMatch = !selectedSection || item.section.endsWith(`${selectedBatch}_${sectionLetter}`);
 
-        // Check if day matches
-        const dayMatch = !selectedDay || getDayName(item.dayId) === selectedDay;
+            // Check if day matches
+            const dayMatch = !selectedDay || getDayName(item.dayId) === selectedDay;
 
-        return sectionMatch && dayMatch;
-    });
+            return sectionMatch && dayMatch;
+        }),
+        [scheduleData, selectedSection, selectedBatch, selectedDay]
+    );
 
     // In the component, modify how we display the time
     const getFormattedTime = (startTime: string, endTime: string) => {
         return `${startTime} - ${endTime}`
     }
 
-    // Add this function to handle form submission
-    const onSubmit = async (data: AddClassForm) => {
-        // Handle form submission here
-        console.log(data)
-        setDialogOpen(false)
-    }
+    // Update onSubmit handler to use form data directly
+    const onSubmit = useCallback(async (data: AddClassForm) => {
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('http://127.0.0.1:8080/api/routines', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    dept: 'CSE' // Only hardcode dept, use form dayId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add class');
+            }
+
+            const newClass = await response.json();
+            setScheduleData(prev => [...prev, newClass]);
+            setDialogOpen(false);
+            form.reset();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to add class');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [form, setScheduleData, setError]);
+
+    const handleSectionClick = useCallback((sectionName: string) => {
+        setExpandedSections(current =>
+            current.includes(sectionName)
+                ? current.filter(name => name !== sectionName)
+                : [...current, sectionName]
+        );
+        setSelectedSection(sectionName);
+    }, []);
 
     return (
         <div className="min-h-screen bg-background">
@@ -209,16 +278,7 @@ export default function Routine() {
                                     variant="ghost"
                                     className={`w-full justify-between font-normal ${selectedSection === section.name ? 'bg-blue-100 text-blue-600' : ''
                                         }`}
-                                    onClick={() => {
-                                        // Only toggle expansion
-                                        setExpandedSections(current =>
-                                            current.includes(section.name)
-                                                ? current.filter(name => name !== section.name)
-                                                : [...current, section.name]
-                                        );
-                                        // Set section selection without toggling
-                                        setSelectedSection(section.name);
-                                    }}
+                                    onClick={() => handleSectionClick(section.name)}
                                 >
                                     {section.name}
                                     {expandedSections.includes(section.name)
@@ -281,6 +341,7 @@ export default function Routine() {
                                                         <FormControl>
                                                             <Input {...field} placeholder="CSE101" />
                                                         </FormControl>
+                                                        <FormMessage /> {/* Shows validation errors */}
                                                     </FormItem>
                                                 )}
                                             />
@@ -291,8 +352,9 @@ export default function Routine() {
                                                     <FormItem>
                                                         <FormLabel>Room ID</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} placeholder="101" />
+                                                            <Input {...field} placeholder="KT-308" />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -303,8 +365,9 @@ export default function Routine() {
                                                     <FormItem>
                                                         <FormLabel>Teacher Initial</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} placeholder="ABC" />
+                                                            <Input {...field} placeholder="SHS" />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -315,8 +378,9 @@ export default function Routine() {
                                                     <FormItem>
                                                         <FormLabel>Employee ID</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} placeholder="EMP123" />
+                                                            <Input {...field} placeholder="00000001" />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -327,8 +391,9 @@ export default function Routine() {
                                                     <FormItem>
                                                         <FormLabel>Section</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} placeholder="64_A" />
+                                                            <Input {...field} placeholder="64_J" />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -341,6 +406,7 @@ export default function Routine() {
                                                         <FormControl>
                                                             <Input {...field} type="time" />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -353,6 +419,45 @@ export default function Routine() {
                                                         <FormControl>
                                                             <Input {...field} type="time" />
                                                         </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="dayId"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Day</FormLabel>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            defaultValue={field.value}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select day" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {DAYS.map((day, index) => (
+                                                                    <SelectItem key={index} value={index.toString()}>
+                                                                        {day}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="dept"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Department</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="CSE" />
+                                                        </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -360,10 +465,17 @@ export default function Routine() {
                                                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                                                     Cancel
                                                 </Button>
-                                                <Button type="submit">Add Class</Button>
+                                                <Button type="submit" disabled={isSubmitting}>
+                                                    {isSubmitting ? "Adding..." : "Add Class"}
+                                                </Button>
                                             </DialogFooter>
                                         </form>
                                     </Form>
+                                    {error && (
+                                        <div className="text-red-500 text-sm mt-2">
+                                            {error}
+                                        </div>
+                                    )}
                                 </DialogContent>
                             </Dialog>
                             <Button variant="outline">Verify</Button>
