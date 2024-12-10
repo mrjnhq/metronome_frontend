@@ -276,11 +276,11 @@ export default function Routine() {
                     <nav className="flex items-center gap-6 text-sm">
                         <Link to="/dashboard" className="text-muted-foreground">Dashboard</Link>
                         <Link to="/routine" className="text-blue-600">Routine</Link>
-                        <Link to="/rooms" className="text-muted-foreground">Rooms</Link>
-                        <Link to="/courses" className="text-muted-foreground">Courses</Link>
-                        <Link to="/teacher" className="text-muted-foreground">Teacher</Link>
-                        <Link to="/department" className="text-muted-foreground">Department</Link>
-                        <Link to="/reports" className="text-muted-foreground">Reports</Link>
+                        <Link to="/not-implemented" className="text-muted-foreground">Rooms</Link>
+                        <Link to="/not-implemented" className="text-muted-foreground">Courses</Link>
+                        <Link to="/not-implemented" className="text-muted-foreground">Teacher</Link>
+                        <Link to="/not-implemented" className="text-muted-foreground">Department</Link>
+                        <Link to="/not-implemented" className="text-muted-foreground">Reports</Link>
                     </nav>
                     <div className="ml-auto flex items-center gap-2">
                         <Avatar>
@@ -288,7 +288,7 @@ export default function Routine() {
                             <AvatarFallback>AS</AvatarFallback>
                         </Avatar>
                         <div className="text-sm">
-                            <div>Adam Smith</div>
+                            <div>Washiul Alam Shohan</div>
                             <div className="text-xs text-muted-foreground">Admin</div>
                         </div>
                     </div>

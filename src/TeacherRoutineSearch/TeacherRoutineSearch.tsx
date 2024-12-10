@@ -20,8 +20,24 @@ import { Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function TeacherRoutineSearch() {
+    interface RoutineItem {
+        key: number
+        roomId: string
+        teacherInitial: string
+        section: string
+        courseCode: string
+        dayId: string
+        startTime: string
+        endTime: string
+        employeeId: string
+        dept: string
+    }
+
+    const [scheduleData, setScheduleData] = useState<RoutineItem[]>([])
     const [teacherInitial, setTeacherInitial] = useState('')
     const [showRoutine, setShowRoutine] = useState(false)
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const timeSlots = [
         "8:30 - 9:45",
@@ -30,16 +46,32 @@ export default function TeacherRoutineSearch() {
         "12:15 - 13:30",
     ]
 
-    const dummyScheduleData = [
-        { room: "G1-006", section: "61_N1", course: "CSE312" },
-        { room: "G1-006", section: "61_N1", course: "TCSE312" },
-        { room: "G1-021", section: "64_J1", course: "CSE222", conflict: true },
-        { room: "KT-318(B)", section: "64_K", course: "" },
+    const ScheduleData: RoutineItem[] = [
     ]
 
-    const handleSearch = () => {
-        // In a real application, this would trigger an API call or data fetch
-        setShowRoutine(true)
+    const handleSearch = async () => {
+        try {
+            if (!teacherInitial) {
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+
+            const response = await fetch(`http://127.0.0.1:8080/api/routines/teacher/${teacherInitial}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch teacher routine');
+            }
+
+            const data = await response.json();
+            setScheduleData(data);
+            setShowRoutine(true);
+        } catch (error) {
+            setError('Failed to fetch routine data');
+            console.error('Failed to fetch routine:', error);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -67,7 +99,7 @@ export default function TeacherRoutineSearch() {
                             <AvatarFallback>AS</AvatarFallback>
                         </Avatar>
                         <div className="text-sm">
-                            <div>Adam Smith</div>
+                            <div>Washiul Alam Shohan</div>
                             <div className="text-xs text-muted-foreground">Admin</div>
                         </div>
                     </div>
@@ -115,47 +147,15 @@ export default function TeacherRoutineSearch() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {dummyScheduleData.map((row, index) => (
-                                    <TableRow key={index}>
+                                {scheduleData.map((row) => (
+                                    <TableRow key={row.key}>
                                         <TableCell>
                                             <Checkbox />
                                         </TableCell>
-                                        <TableCell>{row.room}</TableCell>
+                                        <TableCell>{row.roomId}</TableCell>
                                         <TableCell>{row.section}</TableCell>
                                         <TableCell className="relative">
-                                            {row.course}
-                                            {row.conflict && (
-                                                <>
-                                                    <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">
-                                                        Conflict Found
-                                                    </span>
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                className="absolute right-8 top-1/2 -translate-y-1/2"
-                                                            >
-                                                                <AlertCircle className="h-4 w-4 text-red-500" />
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-80">
-                                                            <div className="grid gap-4">
-                                                                <div className="space-y-2">
-                                                                    <h4 className="font-medium leading-none">Conflict Found</h4>
-                                                                    <p className="text-sm text-muted-foreground">
-                                                                        Conflict found with another class with 61_K
-                                                                    </p>
-                                                                </div>
-                                                                <div className="flex justify-end">
-                                                                    <Button variant="outline" className="text-blue-500">
-                                                                        Show Details
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </>
-                                            )}
+                                            {row.courseCode}
                                         </TableCell>
                                         <TableCell>
                                             <Button variant="ghost" size="icon">
@@ -164,6 +164,13 @@ export default function TeacherRoutineSearch() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                {scheduleData.length === 0 && showRoutine && (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center py-4">
+                                            No routine data found for this teacher
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </>
@@ -172,4 +179,3 @@ export default function TeacherRoutineSearch() {
         </>
     )
 }
-
