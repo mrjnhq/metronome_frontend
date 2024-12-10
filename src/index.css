@@ -1,5 +1,8 @@
 @tailwind base;
 @tailwind components;
+<<<<<<< HEAD
+@tailwind utilities;
+=======
 @tailwind utilities;
 
 :root {
@@ -136,3 +139,4 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+>>>>>>> 95a8713cc9ce0172ee7ff3f36d431a2175f68f08
