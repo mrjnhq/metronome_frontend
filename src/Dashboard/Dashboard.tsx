@@ -2,6 +2,7 @@ import { CalendarIcon, Users, DoorOpen, AlertTriangle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
     return (
@@ -16,13 +17,13 @@ export default function Dashboard() {
                         <span className="font-semibold">Metronome</span>
                     </div>
                     <nav className="flex items-center gap-6 text-sm">
-                        <a className="text-blue-600" href="#">Dashboard</a>
-                        <a className="text-muted-foreground" href="#">Routine</a>
-                        <a className="text-muted-foreground" href="#">Rooms</a>
-                        <a className="text-muted-foreground" href="#">Courses</a>
-                        <a className="text-muted-foreground" href="#">Teacher</a>
-                        <a className="text-muted-foreground" href="#">Department</a>
-                        <a className="text-muted-foreground" href="#">Reports</a>
+                        <Link to="/dashboard" className="text-blue-600">Dashboard</Link>
+                        <Link to="/routine" className="text-muted-foreground">Routine</Link>
+                        <Link to="/rooms" className="text-muted-foreground">Rooms</Link>
+                        <Link to="/courses" className="text-muted-foreground">Courses</Link>
+                        <Link to="/teacher" className="text-muted-foreground">Teacher</Link>
+                        <Link to="/department" className="text-muted-foreground">Department</Link>
+                        <Link to="/reports" className="text-muted-foreground">Reports</Link>
                     </nav>
                     <div className="ml-auto flex items-center gap-2">
                         <Avatar>
@@ -108,4 +109,3 @@ export default function Dashboard() {
         </div>
     )
 }
-

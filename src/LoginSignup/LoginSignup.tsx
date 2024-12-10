@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './LoginSignup.css'
 
 import user_icon from '../Assets/person.png'
@@ -6,8 +7,13 @@ import email_icon from '../Assets/email.png'
 import password_icon from '../Assets/password.png'
 
 const LoginSignup = () => {
-    //Sign/log
-    const [action, setAction] = useState("Sign Up");
+    const navigate = useNavigate()
+    const [action, setAction] = useState("Sign Up")
+
+    const handleLogin = () => {
+        // Add your login logic here
+        navigate('/dashboard')
+    }
 
     return (
         <div className='container'>
@@ -35,7 +41,7 @@ const LoginSignup = () => {
             {action === "Sign Up" ? <div></div> : <div className="forgot-password">Lost Password? <span>Click Here!</span></div>}
             <div className="submit-container">
                 <div className={action === "Login" ? "submit gray" : "submit"} onClick={() => { setAction("Sign Up") }}>Sign Up</div>
-                <div className={action === "Sign Up" ? "submit gray" : "submit"} onClick={() => { setAction("Login") }}>Login</div>
+                <div className={action === "Sign Up" ? "submit gray" : "submit"} onClick={() => { setAction("Login"); handleLogin(); }}>Login</div>
             </div>
         </div>
     )
