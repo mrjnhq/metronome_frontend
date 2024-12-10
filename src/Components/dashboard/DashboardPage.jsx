@@ -1,8 +1,8 @@
-import { Cloud } from "react-feather";
+import { Cloud } from "lucide-react";
 import MainNav from "./MainNav";
 import MetricsCards from "./MetricsCards";
 import QuickActions from "./QuickActions";
-// import Calendar from "./Calendar";
+import Calendar from "./Calendar";
 import Updates from "./Updates";
 import UserNav from "./UserNav";
 
@@ -32,7 +32,7 @@ const DashboardPage = () => (
             <Updates />
           </div>
           <div className="col-span-3">
-            {/* <Calendar /> */}
+            <Calendar />
           </div>
         </div>
       </div>
