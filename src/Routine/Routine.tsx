@@ -36,6 +36,7 @@ export default function Routine() {
     const [scheduleData, setScheduleData] = useState<RoutineItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchRoutines = async () => {
@@ -73,6 +74,10 @@ export default function Routine() {
             days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         },
     ]
+
+    const filteredScheduleData = scheduleData.filter(item =>
+        !selectedDay || item.day === selectedDay
+    )
 
     return (
         <div className="min-h-screen bg-background">
@@ -137,7 +142,9 @@ export default function Routine() {
                                             <Button
                                                 key={day}
                                                 variant="ghost"
-                                                className="w-full justify-start font-normal"
+                                                className={`w-full justify-start font-normal ${selectedDay === day ? 'bg-blue-100 text-blue-600' : ''
+                                                    }`}
+                                                onClick={() => setSelectedDay(day === selectedDay ? null : day)}
                                             >
                                                 {day}
                                             </Button>
@@ -189,8 +196,14 @@ export default function Routine() {
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center text-red-500">{error}</TableCell>
                                 </TableRow>
+                            ) : filteredScheduleData.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                        No classes scheduled for {selectedDay || 'any day'}
+                                    </TableCell>
+                                </TableRow>
                             ) : (
-                                scheduleData.map((row) => (
+                                filteredScheduleData.map((row) => (
                                     <TableRow key={row.id}>
                                         <TableCell>
                                             <Checkbox />
