@@ -53,33 +53,35 @@ export default function Routine() {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="flex h-16 items-center px-4 gap-8">
-                <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-blue-100">
-                        <div className="h-full w-full rounded-full border-4 border-blue-500" />
+            <header className="border-b">
+                <div className="flex h-16 items-center px-4 gap-8">
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-blue-100">
+                            <div className="h-full w-full rounded-full border-4 border-blue-500" />
+                        </div>
+                        <span className="font-semibold">Metronome</span>
                     </div>
-                    <span className="font-semibold">Metronome</span>
-                </div>
-                <nav className="flex items-center gap-6 text-sm">
-                    <Link to="/dashboard" className="text-muted-foreground">Dashboard</Link>
-                    <Link to="/routine" className="text-blue-600">Routine</Link>
-                    <Link to="/rooms" className="text-muted-foreground">Rooms</Link>
-                    <Link to="/courses" className="text-muted-foreground">Courses</Link>
-                    <Link to="/teacher" className="text-muted-foreground">Teacher</Link>
-                    <Link to="/department" className="text-muted-foreground">Department</Link>
-                    <Link to="/reports" className="text-muted-foreground">Reports</Link>
-                </nav>
-                <div className="ml-auto flex items-center gap-2">
-                    <Avatar>
-                        <AvatarImage alt="Adam Smith" />
-                        <AvatarFallback>AS</AvatarFallback>
-                    </Avatar>
-                    <div className="text-sm">
-                        <div>Adam Smith</div>
-                        <div className="text-xs text-muted-foreground">Admin</div>
+                    <nav className="flex items-center gap-6 text-sm">
+                        <Link to="/dashboard" className="text-muted-foreground">Dashboard</Link>
+                        <Link to="/routine" className="text-blue-600">Routine</Link>
+                        <Link to="/rooms" className="text-muted-foreground">Rooms</Link>
+                        <Link to="/courses" className="text-muted-foreground">Courses</Link>
+                        <Link to="/teacher" className="text-muted-foreground">Teacher</Link>
+                        <Link to="/department" className="text-muted-foreground">Department</Link>
+                        <Link to="/reports" className="text-muted-foreground">Reports</Link>
+                    </nav>
+                    <div className="ml-auto flex items-center gap-2">
+                        <Avatar>
+                            <AvatarImage alt="Adam Smith" />
+                            <AvatarFallback>AS</AvatarFallback>
+                        </Avatar>
+                        <div className="text-sm">
+                            <div>Adam Smith</div>
+                            <div className="text-xs text-muted-foreground">Admin</div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
             <div className="flex">
                 {/* Sidebar */}
