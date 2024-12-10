@@ -41,6 +41,25 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
+// Import additional components at top
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 // First, update the interface
 interface RoutineItem {
     key: number
@@ -122,6 +141,28 @@ export default function Routine() {
         }
     })
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Add state for delete dialog
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [selectedClass, setSelectedClass] = useState<RoutineItem | null>(null);
+
+    // Add delete handler
+    const handleDelete = async (classItem: RoutineItem) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8080/api/routines/${classItem.key}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete class');
+            }
+
+            setScheduleData(prev => prev.filter(item => item.key !== classItem.key));
+            setDeleteDialogOpen(false);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to delete class');
+        }
+    };
 
     useEffect(() => {
         const fetchRoutines = async () => {
@@ -525,9 +566,42 @@ export default function Routine() {
                                         </TableCell>
                                         <TableCell>{row.teacherInitial}</TableCell>
                                         <TableCell>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem onSelect={(e) => {
+                                                                e.preventDefault();
+                                                                setSelectedClass(row);
+                                                            }}>
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    This action cannot be undone. This will permanently delete this class.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    className="bg-red-500 hover:bg-red-600"
+                                                                    onClick={() => selectedClass && handleDelete(selectedClass)}
+                                                                >
+                                                                    Delete
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
                                 ))
