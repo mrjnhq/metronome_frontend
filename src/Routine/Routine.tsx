@@ -16,38 +16,62 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+
+interface RoutineItem {
+    id: number
+    day: string
+    time: string
+    room: string
+    section: string
+    courseCode: string
+    courseName: string
+    teacherInitial: string
+}
 
 export default function Routine() {
+    const [scheduleData, setScheduleData] = useState<RoutineItem[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        const fetchRoutines = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8080/api/routines')
+                if (!response.ok) {
+                    throw new Error('Failed to fetch routines')
+                }
+                const data = await response.json()
+                setScheduleData(data)
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch routines')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchRoutines()
+    }, [])
+
     const timeSlots = [
         "8:30 - 9:45",
         "9:45 - 11:00",
         "11:00 - 12:15",
         "12:15 - 13:30",
+        "13:30 - 14:15",
+        "14:15 - 15:45",
+        "15:45 - 16:00",
     ]
 
     const sections = [
-        { name: "Section A", expanded: false },
-        { name: "Section B", expanded: false },
-        { name: "Section C", expanded: false },
         {
-            name: "Section D",
+            name: "Section J",
             expanded: true,
-            days: ["Saturday", "Sunday", "Monday"]
+            days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         },
-    ]
-
-    const scheduleData = [
-        { room: "G1-006", section: "61_N1", course: "CSE312" },
-        { room: "G1-006", section: "61_N1", course: "TCSE312" },
-        { room: "G1-021", section: "64_J1", course: "CSE222", conflict: true },
-        { room: "KT-318(B)", section: "64_K", course: "" },
     ]
 
     return (
@@ -148,62 +172,44 @@ export default function Routine() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-12"></TableHead>
+                                <TableHead>Time</TableHead>
                                 <TableHead>Room</TableHead>
                                 <TableHead>Section</TableHead>
                                 <TableHead>Course</TableHead>
+                                <TableHead>Teacher</TableHead>
                                 <TableHead className="w-12"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {scheduleData.map((row, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        <Checkbox />
-                                    </TableCell>
-                                    <TableCell>{row.room}</TableCell>
-                                    <TableCell>{row.section}</TableCell>
-                                    <TableCell className="relative">
-                                        {row.course}
-                                        {row.conflict && (
-                                            <>
-                                                <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">
-                                                    Conflict Found
-                                                </span>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="absolute right-8 top-1/2 -translate-y-1/2"
-                                                        >
-                                                            <AlertCircle className="h-4 w-4 text-red-500" />
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-80">
-                                                        <div className="grid gap-4">
-                                                            <div className="space-y-2">
-                                                                <h4 className="font-medium leading-none">Conflict Found</h4>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Conflict found with another class with 61_K
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex justify-end">
-                                                                <Button variant="outline" className="text-blue-500">
-                                                                    Show Details
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button variant="ghost" size="icon">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center">Loading...</TableCell>
                                 </TableRow>
-                            ))}
+                            ) : error ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center text-red-500">{error}</TableCell>
+                                </TableRow>
+                            ) : (
+                                scheduleData.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell>
+                                            <Checkbox />
+                                        </TableCell>
+                                        <TableCell>{row.time}</TableCell>
+                                        <TableCell>{row.room}</TableCell>
+                                        <TableCell>{row.section}</TableCell>
+                                        <TableCell>
+                                            {row.courseCode} - {row.courseName}
+                                        </TableCell>
+                                        <TableCell>{row.teacherInitial}</TableCell>
+                                        <TableCell>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                     <div className="mt-4 text-sm text-muted-foreground">
@@ -214,4 +220,3 @@ export default function Routine() {
         </div>
     )
 }
-
