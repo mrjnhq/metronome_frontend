@@ -57,7 +57,7 @@ export default function Routine() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
-    const [expandedSections, setExpandedSections] = useState<string[]>(['Section J'])
+    const [expandedSections, setExpandedSections] = useState<string[]>([])
     const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedBatch, setSelectedBatch] = useState("64");
 
@@ -90,9 +90,9 @@ export default function Routine() {
         "15:45 - 16:00",
     ]
 
-    const sections = Array.from({ length: 10 }, (_, i) => ({
+    const sections = Array.from({ length: 20 }, (_, i) => ({
         name: `Section ${String.fromCharCode(65 + i)}`,
-        expanded: true,
+        expanded: false,
         days: DAYS
     }));
 
@@ -173,16 +173,14 @@ export default function Routine() {
                                     className={`w-full justify-between font-normal ${selectedSection === section.name ? 'bg-blue-100 text-blue-600' : ''
                                         }`}
                                     onClick={() => {
-                                        // Toggle section expansion
+                                        // Only toggle expansion
                                         setExpandedSections(current =>
                                             current.includes(section.name)
                                                 ? current.filter(name => name !== section.name)
                                                 : [...current, section.name]
                                         );
-                                        // Toggle section selection
-                                        setSelectedSection(current =>
-                                            current === section.name ? null : section.name
-                                        );
+                                        // Set section selection without toggling
+                                        setSelectedSection(section.name);
                                     }}
                                 >
                                     {section.name}
@@ -198,7 +196,10 @@ export default function Routine() {
                                                 variant="ghost"
                                                 className={`w-full justify-start font-normal ${selectedDay === day ? 'bg-blue-100 text-blue-600' : ''
                                                     }`}
-                                                onClick={() => setSelectedDay(day === selectedDay ? null : day)}
+                                                onClick={() => {
+                                                    // Just toggle day selection without affecting section
+                                                    setSelectedDay(day === selectedDay ? null : day);
+                                                }}
                                             >
                                                 {day}
                                             </Button>
