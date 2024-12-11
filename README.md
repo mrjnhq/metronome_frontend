@@ -1,50 +1,112 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Metronome - Class Routine Management System
 
-Currently, two official plugins are available:
+A modern web application built with React and TypeScript for managing academic class routines and schedules.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- 📅 Interactive class routine management
+- 👥 Teacher-specific schedule search
+- 🏛️ Room allocation tracking
+- 🔐 Secure authentication system
+- 🎯 Department-wise course organization
+- 📱 Responsive design with modern UI
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Tech Stack
 
-- Configure the top-level `parserOptions` property like this:
+- Frontend:
+  - React 18 with TypeScript
+  - Vite for build tooling
+  - Tailwind CSS for styling
+  - Shadcn UI components
+  - React Hook Form for form management
+  - Zod for validation
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Backend Integration:
+  - RESTful API integration
+  - JWT authentication
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Backend server running on `http://127.0.0.1:8080`
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone "https://github.com/mrjnhq/metronome_frontend.git"
+cd metronome
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+2. Install dependencies:
+```bash
+npm install
 ```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Build for production:
+```bash
+npm run build
+```
+
+## Project Structure
+
+```
+src/
+├── components/    # Reusable UI components
+├── Dashboard/     # Dashboard view
+├── LoginSignup/   # Authentication
+├── Routine/       # Class routine management
+├── hooks/         # Custom React hooks
+└── lib/          # Utility functions
+```
+
+## Configuration
+
+The project uses several configuration files:
+
+- 
+
+components.json
+
+ - Shadcn UI configuration
+- 
+
+tailwind.config.js
+
+ - Tailwind CSS settings
+- 
+
+vite.config.ts
+
+ - Vite bundler configuration
+- 
+
+tsconfig.json
+
+ - TypeScript configuration
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgments
+
+- [Shadcn UI](https://ui.shadcn.com) for the component library
+- [Lucide Icons](https://lucide.dev) for the icon set
+
+For more information or issues, please open a GitHub issue.
